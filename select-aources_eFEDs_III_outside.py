@@ -49,8 +49,8 @@ QSO_MASTER_CSV = "../masterSDSS_V_SDSS_IV_DESI_unique_sources_QSO_ZWARN_RADEC_fi
 COMMON_FITS    = "../common_eFEDS_filtered_extragalactic.fits"                                # SPECZ_RA, SPECZ_DEC
 
 # Set (2): GALAXY master
+#GALAXY_MASTER_FITS = "../cross_master_galaxy_unWISE_W1SNR5_W2SN3_W2-W1.0.65_RA0p360_DECm6.fits" #
 GALAXY_MASTER_CSV = "../masterSDSS_V_SDSS_IV_DESI_unique_sources_GALAXY_ZWARN_RADEC_filters.csv"  # RA, DEC, redshift, r-mag, g-mag
-
 # Set (3): nospectra + unWISE (read via HDU[1])
 NOSPEC_FITS = "../nospectra_eRASS1_Main.v1.1.fits"                                            # expects RA, DEC in HDU[1]
 UNWISE_FITS = "../unWISE_W1SNR5_W2SN3_W2-W1.0.65_RA0p360_DECm6.fits"                          # expects ra, dec in HDU[1]
@@ -180,6 +180,20 @@ def main():
     common_df = common_df.dropna(subset=["SPECZ_RA", "SPECZ_DEC"]).reset_index(drop=True)
 
     # -------------------- Set (2) inputs: GALAXY master --------------------
+
+    #gal = try_read_fits_table(
+    #    GALAXY_MASTER_FITS,
+    #    required=["RA_1", "DEC_1", "redshift", "r-mag"]
+    #    )
+    ## Columns come back upper-cased by try_read_fits_table, including the hyphen:
+    ## RA_1, DEC_1, REDSHIFT, R-MAG
+    #gal["RA"]       = as_float_series(gal["RA_1"]) % 360.0
+    #gal["DEC"]      = as_float_series(gal["DEC_1"])
+    #gal["redshift"] = as_float_series(gal["REDSHIFT"])
+    #gal["r-mag"]    = as_float_series(gal["R-MAG"])
+    #gal = gal.dropna(subset=["RA", "DEC"]).reset_index(drop=True)
+ 
+    
     gal = pd.read_csv(GALAXY_MASTER_CSV)
     need_gal = {"RA", "DEC", "redshift", "r-mag"}
     if not need_gal.issubset(gal.columns):
@@ -230,8 +244,8 @@ def main():
         rs = field_rng(base_tag)  # Deterministic RNG for this field
 
         # Target counts
-        N1 = int(round(0.50 * N_TARGET_PER_FIELD))  # Set 1 (QSO)
-        N2 = int(round(0.20 * N_TARGET_PER_FIELD))  # Set 2 (GALAXY)
+        N1 = int(round(0.40 * N_TARGET_PER_FIELD))  # Set 1 (QSO)
+        N2 = int(round(0.30 * N_TARGET_PER_FIELD))  # Set 2 (GALAXY)
         N3 = N_TARGET_PER_FIELD - N1 - N2           # Set 3 (nospec+unWISE)
         N3a = N3 // 2
         N3b = N3 - N3a
